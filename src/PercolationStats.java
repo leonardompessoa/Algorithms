@@ -4,8 +4,10 @@ import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
 
-    private double [] trialsThreshold;
-    private int trials;
+    private final double [] trialsThreshold;
+    private final int trials;
+    private static final double CONFIDENCE_95 = 1.96;
+
     public PercolationStats(int n, int trials) {
         this.trials = trials;
         trialsThreshold = new double[trials];
@@ -28,33 +30,21 @@ public class PercolationStats {
     }
 
     public double stddev() {
-        double deviation = 0.0;
-        for (int i = 0; i < trialsThreshold.length; i++) {
-            deviation+= Math.pow((trialsThreshold[i] - mean()),2);
-        }
-        if(trials > 1) {
-            return Math.sqrt(deviation /(trials - 1));
-        } else {
-            return 0;
-        }
+       return StdStats.stddev(trialsThreshold);
     }
 
     public double confidenceLo() {
-        return  mean() - ((1.96 *stddev())/Math.sqrt(trials));
+        return  mean() - ((CONFIDENCE_95 *stddev())/Math.sqrt(trials));
     }
 
     public double confidenceHi() {
-        return  mean() + ((1.96 *stddev())/Math.sqrt(trials));
+        return  mean() + ((CONFIDENCE_95 *stddev())/Math.sqrt(trials));
     }
 
     public static void main(String[] args) {
-        PercolationStats stats = new PercolationStats(Integer.valueOf(args[0]), Integer.valueOf(args[1]));
+        PercolationStats stats = new PercolationStats(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
         System.out.println("mean                    = " + stats.mean());
         System.out.println("stddev                  = " + stats.stddev());
         System.out.println("95% confidence interval = [" + stats.confidenceLo() + ", " + stats.confidenceHi() + "]");
-//        mean                    = 0.5929934999999997
-//        stddev                  = 0.00876990421552567
-//        95% confidence interval = [0.5912745987737567, 0.5947124012262428]
-
-    }        // test client (described below)
+    }
 }
