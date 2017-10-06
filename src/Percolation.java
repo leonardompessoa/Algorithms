@@ -3,32 +3,10 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 public class Percolation {
 
     private final WeightedQuickUnionUF weightedQuickUnionUF;
-    private final Site[][] matrix;
+    private final int[][] matrix;
+    private final String[] sites;
     private final int n;
     private int openSites;
-
-    private class Site {
-
-        private final int name;
-        private String status;
-
-        public Site(int name) {
-            this.name = name;
-            this.status = "blocked";
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-
-        public int getName() {
-            return name;
-        }
-    }
 
     public Percolation(int n) {
         this.n = n;
@@ -37,83 +15,96 @@ public class Percolation {
             throw new IllegalArgumentException("Invalid n parameter");
         }
 
-        matrix = new Site[n][n];
+        matrix = new int[n][n];
+        sites = new String[n * n];
+        for (int i = 0; i < n * n; i++) {
+            sites[i] = "blocked";
+        }
 
         weightedQuickUnionUF = new WeightedQuickUnionUF((n * n) + 2);
         int index = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                matrix[i][j] = new Site(index);
+                matrix[i][j] = index;
                 index++;
             }
         }
 
         for (int i = 0; i < n; i++) {
-            weightedQuickUnionUF.union((n * n), matrix[0][i].getName());
+            weightedQuickUnionUF.union((n * n), matrix[0][i]);
         }
 
         for (int i = 0; i < n; i++) {
-            weightedQuickUnionUF.union((n * n) + 1, matrix[n - 1][i].getName());
+            weightedQuickUnionUF.union((n * n) + 1, matrix[n - 1][i]);
         }
 
     }
 
     public void open(int row, int col) {
-        row--;
-        col--;
-        Site site = matrix[row][col];
-        if (!site.getStatus().equals("open")) {
-            site.setStatus("open");
+        if (row <= 0 || row > n || col <= 0 || col > n)
+            throw new IllegalArgumentException("row index i out of bounds");
+
+        int center = matrix[--row][--col];
+
+        if (sites[center].equals("blocked")) {
+//            if (row == 0) {
+//                sites[center] = "full";
+//            } else {
+                sites[center] = "open";
+//            }
             openSites++;
-            if (row > 1) {
-                Site top = matrix[row - 1][col];
-                if (top.getStatus().equals("open")) {
-                    weightedQuickUnionUF.union(site.getName(), top.getName());
+
+            if (row >= 1) {
+                int top = matrix[row - 1][col];
+                if (sites[top].equals("open")) {
+                    weightedQuickUnionUF.union(center, top);
                 }
             }
 
             if (row < this.n - 1) {
-                Site bottom = matrix[row + 1][col];
-                if (bottom.getStatus().equals("open")) {
-                    weightedQuickUnionUF.union(site.getName(), bottom.getName());
+                int bottom = matrix[row + 1][col];
+                if (sites[bottom].equals("open")) {
+                    weightedQuickUnionUF.union(center, bottom);
                 }
             }
 
-            if (col > 1) {
-                Site left = matrix[row][col - 1];
-                if (left.getStatus().equals("open")) {
-                    weightedQuickUnionUF.union(site.getName(), left.getName());
+            if (col >= 1) {
+                int left = matrix[row][col - 1];
+                if (sites[left].equals("open")) {
+                    weightedQuickUnionUF.union(center, left);
                 }
             }
 
             if (col < this.n - 1) {
-                Site right = matrix[row][col + 1];
-                if (right.getStatus().equals("open")) {
-                    weightedQuickUnionUF.union(site.getName(), right.getName());
+                int right = matrix[row][col + 1];
+                if (sites[right].equals("open")) {
+                    weightedQuickUnionUF.union(center, right);
                 }
             }
         }
-
-
     }
 
     public boolean isOpen(int row, int col) {
-        if (row <= 0 || col <= 0 || row > n || col > n) {
-            throw new IllegalArgumentException("Invalid parameters");
-        }
-        Site site = matrix[row - 1][col - 1];
-        return site.getStatus().equals("open");
+        if (row <= 0 || row > n || col <= 0 || col > n)
+            throw new IllegalArgumentException("row index i out of bounds");
+
+        int site = matrix[--row][--col];
+        return sites[site].equals("open") || sites[site].equals("full");
     }
 
+    //    public boolean isFull(int row, int col) {
+//        if (row <= 0 || row > n || col <= 0 || col > n)
+//            throw new IllegalArgumentException("row index i out of bounds");
+//        int site = matrix[--row][--col];
+//        return sites[site].equals("full");
+//    }
     public boolean isFull(int row, int col) {
-//        if(row <= 0 || col <= 0 || row > n || col > n) {
-//            throw new IllegalArgumentException("Invalid parameters");
-//        }
-
-        Site site = matrix[row - 1][col - 1];
+        if (row <= 0 || row > n || col <= 0 || col > n)
+            throw new IllegalArgumentException("row index i out of bounds");
+        int site = matrix[--row][--col];
         boolean isFull = false;
-        if (site.getStatus().equals("open")) {
-            isFull = weightedQuickUnionUF.connected(site.getName(), (n * n));
+        if (sites[site].equals("open")) {
+            isFull = weightedQuickUnionUF.connected(site, (n * n));
         }
         return isFull;
     }
@@ -123,7 +114,6 @@ public class Percolation {
     }
 
     public boolean percolates() {
-        return weightedQuickUnionUF.connected((n * n), (n * n) + 1);
+        return openSites > 0 && weightedQuickUnionUF.connected((n * n), (n * n) + 1);
     }
 }
-

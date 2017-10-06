@@ -4,41 +4,48 @@ import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
 
-    private final double [] trialsThreshold;
-    private final int trials;
     private static final double CONFIDENCE_95 = 1.96;
+    private final int trials;
+    private final double mean;
+    private final double stddev;
 
     public PercolationStats(int n, int trials) {
-        this.trials = trials;
-        trialsThreshold = new double[trials];
-        for(int i = 0; i < trials; i++) {
-            Percolation percolation = new Percolation(n);
-            int row = StdRandom.uniform(n)+1;
-            int col = StdRandom.uniform(n)+1;
+        if (n <= 0 || trials <= 0) {
+            throw new IllegalArgumentException("Invalid parameter");
+        }
 
-            while(!percolation.percolates()){
-                percolation.open(row,col);
-                row = StdRandom.uniform(n)+1;
-                col = StdRandom.uniform(n)+1;
+        this.trials = trials;
+        double [] trialsThreshold = new double[trials];
+        for (int i = 0; i < trials; i++) {
+            Percolation percolation = new Percolation(n);
+            int row = StdRandom.uniform(n) + 1;
+            int col = StdRandom.uniform(n) + 1;
+
+            while (!percolation.percolates()) {
+                percolation.open(row, col);
+                row = StdRandom.uniform(n) + 1;
+                col = StdRandom.uniform(n) + 1;
             }
             trialsThreshold[i] = percolation.numberOfOpenSites() / Math.pow(n, 2);
         }
+        this.mean = StdStats.mean(trialsThreshold);
+        this.stddev = StdStats.stddev(trialsThreshold);
     }
 
     public double mean() {
-        return StdStats.mean(trialsThreshold);
+        return mean;
     }
 
     public double stddev() {
-       return StdStats.stddev(trialsThreshold);
+        return stddev;
     }
 
     public double confidenceLo() {
-        return  mean() - ((CONFIDENCE_95 *stddev())/Math.sqrt(trials));
+        return mean() - ((CONFIDENCE_95 * stddev()) / Math.sqrt(trials));
     }
 
     public double confidenceHi() {
-        return  mean() + ((CONFIDENCE_95 *stddev())/Math.sqrt(trials));
+        return mean() + ((CONFIDENCE_95 * stddev()) / Math.sqrt(trials));
     }
 
     public static void main(String[] args) {
