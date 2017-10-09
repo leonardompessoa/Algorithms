@@ -1,5 +1,3 @@
-package br.com.leonardo;
-
 public class Searching {
 
     public static void main(String[] args) {

@@ -4,7 +4,7 @@ public class Percolation {
 
     private final WeightedQuickUnionUF weightedQuickUnionUF;
     private final int[][] matrix;
-    private final String[] sites;
+    private final char[] sites;
     private final int n;
     private int openSites;
 
@@ -16,9 +16,9 @@ public class Percolation {
         }
 
         matrix = new int[n][n];
-        sites = new String[n * n];
+        sites = new char[n * n];
         for (int i = 0; i < n * n; i++) {
-            sites[i] = "blocked";
+            sites[i] = 'b';
         }
 
         weightedQuickUnionUF = new WeightedQuickUnionUF((n * n) + 2);
@@ -46,38 +46,34 @@ public class Percolation {
 
         int center = matrix[--row][--col];
 
-        if (sites[center].equals("blocked")) {
-//            if (row == 0) {
-//                sites[center] = "full";
-//            } else {
-                sites[center] = "open";
-//            }
+        if (sites[center] == ('b')) {
+            sites[center] = 'o';
             openSites++;
 
             if (row >= 1) {
                 int top = matrix[row - 1][col];
-                if (sites[top].equals("open")) {
+                if (sites[top] == 'o') {
                     weightedQuickUnionUF.union(center, top);
                 }
             }
 
             if (row < this.n - 1) {
                 int bottom = matrix[row + 1][col];
-                if (sites[bottom].equals("open")) {
+                if (sites[bottom] == 'o') {
                     weightedQuickUnionUF.union(center, bottom);
                 }
             }
 
             if (col >= 1) {
                 int left = matrix[row][col - 1];
-                if (sites[left].equals("open")) {
+                if (sites[left] == 'o') {
                     weightedQuickUnionUF.union(center, left);
                 }
             }
 
             if (col < this.n - 1) {
                 int right = matrix[row][col + 1];
-                if (sites[right].equals("open")) {
+                if (sites[right] == 'o') {
                     weightedQuickUnionUF.union(center, right);
                 }
             }
@@ -89,21 +85,15 @@ public class Percolation {
             throw new IllegalArgumentException("row index i out of bounds");
 
         int site = matrix[--row][--col];
-        return sites[site].equals("open") || sites[site].equals("full");
+        return sites[site] == 'o' || sites[site] == 'f';
     }
 
-    //    public boolean isFull(int row, int col) {
-//        if (row <= 0 || row > n || col <= 0 || col > n)
-//            throw new IllegalArgumentException("row index i out of bounds");
-//        int site = matrix[--row][--col];
-//        return sites[site].equals("full");
-//    }
     public boolean isFull(int row, int col) {
         if (row <= 0 || row > n || col <= 0 || col > n)
             throw new IllegalArgumentException("row index i out of bounds");
         int site = matrix[--row][--col];
         boolean isFull = false;
-        if (sites[site].equals("open")) {
+        if (sites[site] == 'o') {
             isFull = weightedQuickUnionUF.connected(site, (n * n));
         }
         return isFull;
