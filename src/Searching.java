@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 public class Searching {
 
     public static void main(String[] args) {
@@ -43,6 +45,7 @@ public class Searching {
     }
 
     private static int recursiveBinarySearch(char[] array, int init, int end, char search) {
+
         if(init > end) {
             return -1;
         }
