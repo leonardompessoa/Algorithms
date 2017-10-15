@@ -22,7 +22,7 @@ public class ArrayQueue<T> implements Queue<T> {
         T item = queue[head];
         queue[head] = null;
         head++;
-        if (head % tail == tail / 2) {
+        if (tail > 0 && head % tail == tail / 2) {
             resize((queue.length / 2));
         }
         return item;
@@ -57,7 +57,7 @@ public class ArrayQueue<T> implements Queue<T> {
 
         @Override
         public boolean hasNext() {
-            return queue[current] != null;
+            return current < queue.length && queue[current] != null;
         }
 
         @Override
